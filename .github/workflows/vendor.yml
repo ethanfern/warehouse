@@ -1,0 +1,44 @@
+name: Bundle reader files
+# Runs once when this file is added, or on demand from the Actions tab.
+# Copies the text reader (Tesseract.js) and its English data into /vendor so the page
+# runs with no outside requests.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/vendor.yml'
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch pinned packages
+        run: |
+          mkdir -p /tmp/v && cd /tmp/v
+          npm init -y > /dev/null
+          npm install --ignore-scripts tesseract.js@5.1.1 tesseract.js-core@5.1.1 @tesseract.js-data/eng@1.0.0
+      - name: Copy files into vendor
+        run: |
+          set -e
+          N=/tmp/v/node_modules
+          rm -rf vendor
+          mkdir -p vendor/lang vendor/licenses
+          cp $N/tesseract.js/dist/tesseract.min.js vendor/
+          cp $N/tesseract.js/dist/worker.min.js vendor/
+          cp $N/tesseract.js-core/tesseract-core* vendor/
+          cp $N/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz vendor/lang/
+          cp $N/tesseract.js/LICENSE.md vendor/licenses/tesseract.js-LICENSE.md || true
+          cp $N/tesseract.js-core/LICENSE vendor/licenses/tesseract.js-core-LICENSE || true
+          ls -laR vendor
+          du -sh vendor
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vendor
+          git diff --cached --quiet && echo "No changes" || (git commit -m "Bundle reader files for offline use" && git push)
