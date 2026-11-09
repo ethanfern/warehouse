@@ -1,5 +1,5 @@
 // Keeps the page and reader files on the phone so it works offline.
-const V = 'belt-v3';
+const V = 'belt-v4';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(
   caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())
