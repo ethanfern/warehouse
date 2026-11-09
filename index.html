@@ -1069,7 +1069,9 @@ function findMatches(text) {
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   let mine = (store.get('belt.mine', []) || []).filter(x => /^\d{1,2}$/.test(String(x))).map(String);
-  let recent = (store.get('belt.recent', []) || []).filter(r => r && r.query);
+  // Only suburb names are kept. Older saved entries are stripped down to the suburb on load.
+  let recent = (store.get('belt.recent', []) || []).filter(r => r && r.query).map(r => ({ query: String(r.query), street: '', postcode: '' }));
+  store.set('belt.recent', recent);
   const isMine = n => mine.includes(String(n));
 
   /* ---------- my numbers ---------- */
@@ -1140,8 +1142,8 @@ function findMatches(text) {
     addRecent(items[0]);
   }
   function addRecent(m) {
-    recent = recent.filter(r => r.query !== m.query || r.street !== m.street);
-    recent.unshift({ query: m.query, street: m.street || '', postcode: m.postcode || '' });
+    recent = recent.filter(r => r.query !== m.query);
+    recent.unshift({ query: m.query, street: '', postcode: '' });
     recent = recent.slice(0, 8);
     store.set('belt.recent', recent);
     renderRecent();
