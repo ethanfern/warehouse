@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Van Numbers">
+<meta name="theme-color" content="#F0B400">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Belt Numbers List</title>
+<style>
+/* Layout: one narrow column built for one hand on a phone. Result card on top, scan button docked at the bottom of the screen. */
+:root {
+  --bg: #EDEFEA;
+  --surface: #FFFFFF;
+  --ink: #151918;
+  --muted: #58625D;
+  --line: #C9D0CA;
+  --accent: #F0B400;
+  --accent-ink: #151918;
+  --yours: #157A3B;
+  --yours-ink: #FFFFFF;
+  --pass: #2B3330;
+  --pass-ink: #EDEFEA;
+  --warn: #8F2514;
+  --warn-bg: #FBE9E4;
+  --focus: #0B57D0;
+  --font-display: 'Avenir Next Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101312;
+    --surface: #1A1F1D;
+    --ink: #EEF1ED;
+    --muted: #9BA6A0;
+    --line: #303835;
+    --accent: #FFC61A;
+    --accent-ink: #151918;
+    --yours: #2FD17A;
+    --yours-ink: #06210F;
+    --pass: #2A322F;
+    --pass-ink: #EEF1ED;
+    --warn: #FFB4A5;
+    --warn-bg: #3A1F1A;
+    --focus: #8AB4FF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101312;
+  --surface: #1A1F1D;
+  --ink: #EEF1ED;
+  --muted: #9BA6A0;
+  --line: #303835;
+  --accent: #FFC61A;
+  --accent-ink: #151918;
+  --yours: #2FD17A;
+  --yours-ink: #06210F;
+  --pass: #2A322F;
+  --pass-ink: #EEF1ED;
+  --warn: #FFB4A5;
+  --warn-bg: #3A1F1A;
+  --focus: #8AB4FF;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.4;
+  padding-block: 16px 128px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+header h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 36px;
+  text-transform: uppercase; letter-spacing: .03em; line-height: 1;
+}
+.hazard {
+  width: 84px; height: 8px; margin: 8px 0 8px;
+  background: repeating-linear-gradient(135deg, var(--accent) 0 8px, var(--ink) 8px 16px);
+}
+.sub { margin: 0; color: var(--muted); font-size: 15px; }
+
+.label {
+  font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.mine { display: flex; flex-direction: column; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 6px 0 16px;
+  border: 2px solid var(--ink); border-radius: 999px; background: var(--surface);
+  font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1;
+}
+.chip button {
+  width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; cursor: pointer;
+  font-size: 24px; line-height: 1; color: var(--muted);
+}
+.hint { color: var(--muted); font-size: 15px; margin: 0; }
+.row { display: flex; gap: 8px; }
+.row input { flex: 1; min-width: 0; }
+.field {
+  height: 52px; padding: 0 14px; border: 2px solid var(--ink); border-radius: 10px;
+  background: var(--surface); font-size: 18px; width: 100%;
+}
+.btn {
+  height: 52px; padding: 0 18px; border: 2px solid var(--ink); border-radius: 10px; background: var(--surface);
+  font-weight: 600; cursor: pointer;
+}
+.btn.small { height: 40px; padding: 0 12px; font-size: 15px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.who { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.suburb { font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1; }
+.pc { font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tag {
+  margin-left: auto; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; color: var(--muted);
+}
+.read { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.nums { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.num {
+  display: inline-block; font-family: var(--font-display); font-weight: 700; line-height: .95;
+  padding: .04em .2em .02em; border: 3px solid var(--ink); border-radius: 10px; background: var(--surface);
+  font-variant-numeric: tabular-nums; font-size: clamp(72px, 24vw, 120px);
+}
+.nums.single .num { font-size: clamp(110px, 36vw, 176px); }
+.nums.mid .num { font-size: clamp(52px, 16vw, 76px); border-width: 2px; border-radius: 8px; }
+.num.yours { background: var(--yours); color: var(--yours-ink); border-color: var(--yours); }
+.verdict {
+  margin-top: 14px; padding: 12px 14px; border-radius: 8px; font-family: var(--font-display);
+  font-weight: 700; font-size: 30px; line-height: 1.05; text-transform: uppercase; letter-spacing: .02em;
+}
+.verdict.yours { background: var(--yours); color: var(--yours-ink); }
+.verdict.pass { background: var(--pass); color: var(--pass-ink); }
+.meta { margin: 10px 0 0; color: var(--muted); font-size: 15px; }
+.warnbox {
+  margin: 12px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--warn-bg); color: var(--warn);
+  font-size: 15px; font-weight: 500;
+}
+.variants { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.variant { border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.variant .vl { font-weight: 600; }
+.variant .vs { color: var(--muted); font-size: 14px; }
+.reading { display: flex; gap: 14px; align-items: center; }
+.reading img { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+.reading .big { font-family: var(--font-display); font-weight: 700; font-size: 30px; text-transform: uppercase; line-height: 1; }
+.suggs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.lookup { display: flex; flex-direction: column; gap: 8px; }
+.sugg-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.sugg-list:empty { display: none; }
+.sugg-list li + li { border-top: 1px solid var(--line); }
+.sugg-list button {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 52px;
+  padding: 6px 14px; border: 0; background: transparent; cursor: pointer; text-align: left;
+}
+.sugg-list .n { font-family: var(--font-display); font-weight: 700; font-size: 28px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.recent h2, .sheet summary {
+  margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.recent ol { list-style: none; margin: 8px 0 0; padding: 0; }
+.recent li button {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 52px;
+  padding: 6px 2px; border: 0; border-bottom: 1px solid var(--line); background: transparent; cursor: pointer; text-align: left;
+}
+.recent .nn { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.mini {
+  font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1; padding: 3px 8px 1px;
+  border: 2px solid var(--ink); border-radius: 6px; font-variant-numeric: tabular-nums;
+}
+.mini.yours { background: var(--yours); color: var(--yours-ink); border-color: var(--yours); }
+
+.sheet { border-top: 2px solid var(--ink); padding-top: 12px; }
+.sheet summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; }
+.sheet .body { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.srow { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.srow .nm { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.srow .sd { color: var(--muted); font-size: 14px; font-weight: 400; }
+.srow .nn { font-family: var(--font-display); font-weight: 700; font-size: 26px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.srow .edit { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.srow .edit input { flex: 1; min-width: 120px; height: 44px; font-size: 18px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 8px; background: var(--surface); }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+.badge.chk { background: var(--warn-bg); color: var(--warn); }
+.badge.ed { border: 1px solid var(--line); color: var(--muted); }
+.link { background: none; border: 0; padding: 4px 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 14px; }
+
+.dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--bg); border-top: 1px solid var(--line);
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.dock .in { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+.scan {
+  display: flex; align-items: center; justify-content: center; gap: 12px; height: 68px; border-radius: 10px;
+  background: var(--accent); color: var(--accent-ink); border: 2px solid var(--ink);
+  font-family: var(--font-display); font-weight: 700; font-size: 32px; text-transform: uppercase; letter-spacing: .04em; cursor: pointer;
+}
+.scan svg { width: 32px; height: 32px; }
+.scan.off { opacity: .45; cursor: not-allowed; }
+.scan-note { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
+.scan-note:empty { display: none; }
+
+body { padding-block: 16px 32px; }
+.searchbar { position: sticky; top: 0; z-index: 4; background: var(--bg); padding-block: 8px; display: flex; flex-direction: column; gap: 6px; }
+.searchbar .field { height: 60px; font-size: 22px; }
+.res { display: flex; flex-direction: column; gap: 12px; }
+.rcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.rcard .suburb { font-size: 34px; }
+.rcard .nums { margin-top: 0; }
+.rcard .num { font-size: 64px; }
+.rcard.many .num { font-size: 48px; }
+.vrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.vrow .vl { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.vrow .vs { color: var(--muted); font-size: 14px; }
+.empty { color: var(--muted); padding: 12px 2px; }
+details.mine2 { border-top: 1px solid var(--line); padding-top: 10px; }
+details.mine2 summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+details.mine2 .inner { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Van Numbers</h1>
+    <div class="hazard" aria-hidden="true"></div>
+    <p class="sub">Type a suburb. No camera. Nothing is saved or sent.</p>
+  </header>
+
+  <div class="searchbar">
+    <label class="sr" for="q">Suburb</label>
+    <div class="row">
+      <input class="field" id="q" type="search" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Suburb, e.g. Salis" autofocus>
+      <button class="btn" id="clear" type="button">Clear</button>
+    </div>
+  </div>
+
+  <div class="res" id="res" aria-live="polite"></div>
+
+  <details class="mine2">
+    <summary id="mine-sum">Your numbers</summary>
+    <div class="inner">
+      <div class="chips" id="mine-chips"></div>
+      <p class="hint">Add the numbers you take off the belt, like 13, 10, 55. They show green in the results.</p>
+      <form class="row" id="mine-form" autocomplete="off">
+        <label class="sr" for="mine-input">Add a number</label>
+        <input class="field" id="mine-input" inputmode="numeric" placeholder="Add a number" maxlength="12">
+        <button class="btn" type="submit">Add</button>
+      </form>
+    </div>
+  </details>
+</div>
+<script>
+
+const RAW = `
+16|ABERFOYLE PARK
+8,12,14|ADELAIDE
+39|ADELAIDE AIRPORT
+23|ALBERT PARK|ex Port Rd
+18|ALBERT PARK|Port Rd
+18|ALBERTON
+41|ALDGATE||(O)
+56|ALDINGA||(O)
+56|ALDINGA BEACH||(O)
+5,18|ALLENBY GARDENS
+49,51|ALTONA||(O) PM
+50|ANDREWS FARM||AM
+43|ANGAS PLAINS||(O) PM
+49,51|ANGASTON||(O)
+36|ANGLE PARK|||!
+50|ANGLE VALE||(O)
+25|ASCOT PARK
+25|ASHFORD
+41|ASHTON||(O) AM
+29|ATHELSTONE||AM
+38|ATHOL PARK
+29|AULDANA||AM
+53|AVOCA DELL||(O) PM
+56|BACK VALLEY||(O) AM
+56|BALD HILLS||(O) AM
+41|BALHANNAH||(O)
+34|BANKSIA PARK
+63|BAROSSA GOLDFIELDS||(O) Once Daily
+63|BASKET RANGE||(O) Once Daily
+17|BEAUMONT
+24|BEDFORD PARK
+3|BELAIR
+3|BELLEVUE HEIGHTS||AM
+43|BELVIDERE||(O)
+49,51|BETHANY||(O) AM - M W F
+1|BEULAH PARK
+5|BEVERLEY|ex Port Rd
+18|BEVERLEY|Port Rd
+21|BIBARINGA||(O) AM - West of One Tree Hill rd
+43|BIGGS FLAT||(O) AM
+63|BIRDWOOD||(O) Once Daily
+38|BIRKENHEAD
+42|BLACK FOREST
+43|BLACKFELLOWS CREEK||(O) AM
+3|BLACKWOOD
+13,30,31|BLAIR ATHOL
+10|BLAKEVIEW
+35|BLAKISTON||(O) PM
+43|BLETCHLEY||(O)
+64|BLEWITT SPRINGS||(O) AM
+50|BOLIVAR
+14|BOWDEN
+41|BRADBURY||(O) PM - M,W,F
+33|BRAHMA LODGE
+41|BRIDGEWATER||(O)
+25|BRIGHTON
+25|BRIGHTON SOUTH
+30|BROADVIEW
+14|BROMPTON
+5,39|BROOKLYN PARK
+3|BROWN HILL CREEK||(O) AM - Tues, Thu
+35|BRUKUNGA||(O) PM
+21|BUCHFELDE||(O) AM
+50|BUCKLAND PARK||(O)
+43|BUGLE RANGES||(O) AM - M W F
+17|BURNSIDE
+50|BURTON
+53|CALLINGTON||(O) AM
+9|CAMDEN PARK
+27,29|CAMPBELLTOWN
+41|CAREY GULLY||(O) AM
+56|CARRICKALINGA||(O) AM
+29|CASTAMBUL||(O) AM
+31|CAVAN
+64|CHANDLERS HILL||AM
+63|CHAIN OF PONDS||(O) Once Daily
+43|CHAPEL HILL||(O) AM
+63|CHARLESTON||(O) Once Daily
+18|CHELTENHAM
+2|CHELTENHAM|ex Port Rd|PM
+3|CHERRY GARDENS||(O) AM - Tues, Thu
+63|CHERRYVILLE||(O) Once Daily
+64|CHITON||(O)
+48|CHRISTIE DOWNS||AM
+48|CHRISTIES BEACH
+3|CLAPHAM||AM
+42|CLARENCE GARDENS
+42|CLARENCE PARK
+64|CLARENDON||(O) AM
+30|CLEARVIEW
+41|CLELAND||(O) PM
+24|CLOVELLY PARK
+30|CLOVERCREST
+21|COCKATOO VALLEY||(O) AM Tues, Thu
+3|COL LIGHT GARDENS||AM
+1|COLLEGE PARK
+30|COLLINSWOOD
+21|CONCORDIA||(O) AM
+3|COROMANDEL EAST||(O) AM - Tues, Thu
+3|COROMANDEL VALLEY||AM
+39|COWANDILLA
+41|CRAFERS||(O)
+41|CRAFERS WEST||(O) PM
+3|CRAIGBURN FARM||AM
+10|CRAIGMORE
+63|CROMER||(O) Once Daily
+38|CROYDON|ex Port Rd
+18|CROYDON|Port Rd
+38|CROYDON PARK|ex Sth Rd
+36|CROYDON PARK|Sth Rd
+63|CUDLEE CREEK||(O) Once Daily
+42|CUMBERLAND PARK
+64|CURRENCY CREEK||(O) PM
+24|DARLINGTON||AM
+49,51|DAVEYSTON||(O) AM
+10|DAVOREN PARK
+24,42|DAW PARK
+42|DAW PARK REPAT
+35|DAWESLEY||(O) PM
+27|DERNANCOURT
+30|DEVON PARK
+64|DINGABLEDINGA||(O) AM
+50|DIREK
+64|DORSET VALE||(O) PM - W, F
+25|DOVER GARDENS
+31|DRY CREEK
+50|DRY CREEK|Magazine Rd|AM
+36|DUDLEY PARK
+17|DULWICH
+41|EAGLE ON THE HILL||(O)
+17|EASTWOOD
+49,51|EBENEZER||(O) AM
+43|ECHUNGA||(O) AM
+3|EDEN HILLS||AM
+50|EDINBURGH
+10|EDINBURGH NORTH
+50|EDINBURGH RAAF||AM
+7|EDWARDSTOWN
+10|ELIZABETH ALL AREAS
+54|ENCOUNTER BAY||(O)
+30|ENFIELD
+17|ERINDALE
+38|ETHELTON
+12|EVANDALE
+21|EVANSTON||(O)
+21|EVANSTON GARDENS||(O)
+21|EVANSTON PARK||(O)
+21|EVANSTON SOUTH||(O)
+42|EVERARD PARK
+38|EXETER
+39|EXPORT PARK||AM
+50|EYRE||(O)
+34|FAIRVIEW PARK
+27|FELIXSTOW
+38|FERRYDEN PARK
+5,39|FINDON
+29|FIRLE
+13|FITZROY
+16|FLAGSTAFF HILL
+43|FLAXLEY||(O) AM
+24|FLINDERS
+5|FLINDERS PARK
+24|FLINDERS HOSPITAL||AM
+24|FLINDERS UNI||AM
+49,51|FORDS||(O) AM
+63|FOREST RANGE||(O) Once Daily
+42|FORESTVILLE
+63|FORRESTON||(O)
+49,51|FREELING||(O) AM
+17|FREWVILLE
+39|FULHAM
+39|FULHAM GARDENS
+17|FULLARTON
+2|GARDEN ISLAND||AM
+21|GAWLER||(O)
+21|GAWLER BELT||(O)
+21|GAWLER EAST||(O)
+21|GAWLER SOUTH||(O)
+21|GAWLER WEST||(O)
+43|GEMMELLS||(O)
+13,31|GEPPS CROSS|||!
+53|GIFFORD HILL||(O) PM
+1|GILBERTON||AM
+27|GILLES PLAINS
+2|GILLMAN||AM
+42|GLANDORE
+38|GLANVILLE
+17|GLEN OSMOND
+3|GLENALTA
+48|GLENELG
+7|GLENELG EAST
+48|GLENELG NORTH||AM
+48|GLENELG SOUTH||AM
+7|GLENGOWRIE
+17|GLENSIDE
+17|GLENUNGA
+50|GLOBE DERBY PARK
+29|GLYNDE
+34|GOLDEN GROVE
+49,51|GOMERSAL||(O)
+3|GOODWOOD|ex Goodwood Rd
+24|GOODWOOD|Goodwood Rd
+64|GOOLWA||(O)
+10|GOULD CREEK||(O) AM - Mon, Thu
+39|GRANGE
+50|GREEN FIELDS
+43|GREEN HILLS RANGE||(O) AM - M W F
+27|GREENACRES
+41|GREENHILL||(O) AM
+49,51|GREENOCK||(O) AM
+34|GREENWITH||AM
+30|GULFVIEW HEIGHTS
+63|GUMERACHA||(O) Once Daily
+16|HACKHAM||AM
+48|HACKHAM WEST
+1|HACKNEY
+41|HAHNDORF||(O)
+48|HALLETT COVE
+27|HAMPSTEAD GARDENS
+16|HAPPY VALLEY
+39|HARBOURTOWN||AM
+63|HARROGATE||(O) Thursdays Only
+3|HAWTHORN||AM
+3|HAWTHORNDENE||AM
+35|HAY VALLEY||(O) PM
+64|HAYBOROUGH||(O)
+17|HAZELWOOD PARK
+41|HEATHFIELD||(O) PM
+17|HEATHPOOL
+29|HECTORVILLE
+23|HENDON
+39|HENLEY BEACH
+39|HENLEY BEACH SOUTH
+21|HEWETT||(O)
+27|HIGHBURY
+17|HIGHGATE
+43|HIGHLAND VALLEY||(O) AM - Tues, Thu
+10|HILLBANK||AM
+27|HILLCREST
+21|HILLIER||(O) PM
+39|HILTON
+5|HINDMARSH|ex Port Rd
+14,18|HINDMARSH|Port Rd
+64|HINDMARSH ISLAND||(O) PM
+54|HINDMARSH TIERS||(O) PM
+54|HINDMARSH VALLEY||(O)
+27|HOLDEN HILL
+64|HOPE FOREST||(O) AM
+34|HOPE VALLEY||AM
+41|HORSNELL GULLY||(O) AM
+63|HOUGHTON||(O) Once Daily
+25|HOVE
+63|HUMBUG SCRUB||(O) Once Daily
+48|HUNTFIELD HEIGHTS
+3|HYDE PARK||AM
+30|INGLE FARM
+63|INGLEWOOD||(O) Once Daily
+56|INMAN VALLEY||(O) AM
+63|INVERBRACKIE||(O) Once Daily
+41|IRONBANK||(O) PM - M,W,F
+12|JOSLIN
+43|JUPITER CREEK||(O) AM
+21|KALBEEBA||(O) AM
+43|KANGARILLA||(O) AM - M,T,F
+21|KANGAROO FLAT||(O)
+49,51|KAPUNDA||(O) AM
+1|KENSINGTON
+29|KENSINGTON GARDENS
+1|KENSINGTON PARK
+1|KENT TOWN
+63|KENTON VALLEY||(O) Once Daily
+63|KERSBROOK||(O) Once Daily
+25|KESWICK
+14|KESWICK TERMINAL
+5|KIDMAN PARK
+13,31|KILBURN
+38|KILKENNY
+3|KINGS PARK
+24|KINGS PARK|Ex Goodwood Rd
+21|KINGSFORD||(O) AM
+24|KINGSTON PARK||AM
+3|KINGSWOOD||PM
+27|KLEMZIG
+49,51|KOONUNGA||(O) AM
+49,51|KRONDOF||(O) AM - M W F
+21|KUDLA||(O) PM
+43|KUITPO||(O) AM - Tues, Thu
+43|KUITPO COLONY||(O) AM - Tues, Thu
+9|KURRALTA PARK
+64|KYEEMA||(O) AM
+43|LANGHORNE CREEK||(O)
+38|LARGS BAY||AM
+38|LARGS NORTH||AM
+17|LEABROOK
+41|LEAWOOD GARDENS||(O)
+63|LENSWOOD||(O) Once Daily
+21|LEWISTON||(O) AM
+49,51|LIGHT PASS||(O)
+27|LIGHTSVIEW
+17|LINDEN PARK
+35|LITTLEHAMPTON||(O)
+63|LOBETHAL||(O) Once Daily
+5|LOCKLEYS
+41|LONGWOOD||(O) PM - M,W,F
+20|LONSDALE
+63|LOWER HERMITAGE||(O) Once Daily
+56|LOWER INMAN VALLEY||(O) AM
+3|LOWER MITCHAM||AM
+49,51|LYNDOCH||(O) PM
+3|LYNTON||AM
+43|MACCLESFIELD||(O)
+50|MACDONALD PARK||(O)
+29|MAGILL
+17|MALVERN|Duthy St|PM
+3|MALVERN|ex Duthy St
+27|MANNINGHAM
+38|MANSFIELD PARK
+49,51|MARANANGA||(O) AM
+63|MARBLE HILL||(O) Once Daily
+12|MARDEN
+24|MARINO
+25|MARION
+9|MARLESTON
+17|MARRYATVILLE
+19|MASLIN BEACH||(O) PM
+13,31,33|MAWSON LAKES
+12|MAYLANDS
+54|MCCRACKEN||(O)
+64|MCLAREN FLAT||(O) AM
+19,63|MCLAREN VALE||(O)
+43|MEADOWS||(O) AM
+1,30|MEDINDIE
+30|MEDINDIE GARDENS
+42|MELROSE PARK
+64|FOREST RANGE||(O) Once Daily
+5,18,39|MILE END
+42|MILE END SOUTH
+63|MILLBROOK||(O) Once Daily
+3|MILLSWOOD|ex Goodwood
+42|MILLSWOOD|Goodwood Rd
+3|MITCHAM
+25|MITCHELL PARK
+19|MOANA||(O)
+53|MOBILONG||(O) AM
+34|MODBURY
+30,34|MODBURY HEIGHTS
+30,34|MODBURY NORTH
+53|MONARTO||(O)
+53|MONARTO SOUTH||(O)
+29|MONTACUTE||(O) AM
+64|MONTARRA||(O) AM
+49,51|MOPPA||(O) AM
+16|MORPHETT VALE
+7|MORPHETTVILLE
+64|MOSQUITO HILL||(O) PM
+35|MOUNT BARKER||(O)
+35|MT BARKER SPRINGS||(O) PM
+35|MT BARKER SUMMIT||(O) PM
+35|MT BARKER JUNCTION||(O) AM
+54|MOUNT COMPASS||(O)
+63|MOUNT CRAWFORD||(O) Once Daily
+41|MT GEORGE||(O) AM - M W F
+54|MOUNT JAGGED||(O)
+41|MT LOFTY||(O) AM - M W F
+64|MT MAGNIFICENT||(O) PM - Tues, Thu
+41|MT OSMOND||(O) AM - M W F
+63|MOUNT PLEASANT||(O) Once Daily
+63|MOUNT TORRENS||(O) Once Daily
+10|MUNNO PARA
+10,50|MUNNO PARA DOWNS
+10,50|MUNNO PARA WEST
+53|MURRAY BRIDGE||(O)
+41|MYLOR||(O) PM - M,W,F
+56|MYPONGA||(O) AM
+56|MYPONGA BEACH||(O) AM
+17|MYRTLE BANK
+30|NAILSWORTH
+49,51|NAIN||(O) AM
+35|NAIRNE||(O) PM
+64|NANGKITA||(O) PM - Tues, Thu
+17|NETHERBY||PM
+9|NETLEY
+38|NEW PORT
+29|NEWTON
+48|NOARLUNGA CENTRE
+48|NOARLUNGA DOWNS||AM
+56|NORMANVILLE||(O) AM
+1,8|NORTH ADELAIDE
+38|NORTH HAVEN||AM
+9|NORTH PLYMPTON
+53|NORTHERN HEIGHTS||(O) PM
+30|NORTHFIELD
+27|NORTHGATE
+63|NORTON SUMMIT||(O) Once Daily
+12|NORWOOD
+9|NOVAR GARDENS
+49,51|NURIOOTPA||(O)
+41|OAKBANK||(O)
+27|OAKDEN
+25|OAKLANDS PARK
+16|O'HALLORAN HILL|||!
+16|OLD NOARLUNGA||PM|!
+16|OLD REYNELLA|||!
+10|ONE TREE HILL||(O) AM - Mon, Thu
+16|ONKAPARINGA HILLS||(O) AM
+38|OSBORNE||AM
+48|O'SULLIVAN BEACH
+2|OTTOWAY
+38|OUTER HARBOR||AM
+14|OVINGHAM
+41|PAECHTOWN||(O) AM
+54|PAGES FLAT||(O) PM
+53|PALLAMANA||(O) AM
+24|PANORAMA
+30|PARA HILLS
+13|PARA HILLS WEST
+30|PARA VISTA
+63|PARACOMBE||(O) Once Daily
+27,29|PARADISE
+13|PARAFIELD
+13|PARAFIELD AIRPORT||AM
+33|PARAFIELD GARDENS
+50|PARALOWIE
+43|PARIS CREEK||(O)
+25|PARK HOLME
+3,17|PARKSIDE
+24|PASADENA
+12,29|PAYNEHAM
+29|PAYNEHAM SOUTH
+50|PENFIELD||(O)
+50|PENFIELD GARDENS||(O)
+2|PENNINGTON||PM
+49,51|PENRICE||(O) PM
+38|PETERHEAD
+35|PETWOOD||(O) PM - M, W, F
+41|PICCADILLY||(O)
+9|PLYMPTON
+25|PLYMPTON PARK
+13|POORAKA
+18,23|PORT ADELAIDE
+2|PORT ADELAIDE|Moorhouse Rd
+56|PORT ELLIOT||(O)
+48|PORT NOARLUNGA
+48|PT NOARLUNGA STH||(O)
+56|PORT WILLUNGA||(O)
+13|PROSPECT||AM
+30,31|PROSPECT
+43|PROSPECT HILL||(O) AM - Tues, Thu
+18,23|QUEENSTOWN
+34|REDWOOD PARK
+36|REGENCY PARK
+21|REID||(O)
+30|RENOWN PARK
+16|REYNELLA
+16|REYNELLA EAST
+9|RICHMOND
+34|RIDGEHAVEN
+30|RIDLEYTON
+53|RIVERGLADES||(O)
+53|RIVERGLEN||(O)
+53|ROCKY GULLY||(O)
+17|ROSE PARK
+49,51|ROSEDALE||(O) PM
+2|ROSEWATER||PM
+21|ROSEWORTHY||(O) AM
+21|ROSEWORTHY UNI||(O) AM
+29|ROSSLYN PARK||AM
+29|ROSTREVOR
+49,51|ROWLAND FLAT||(O) AM - M W F
+23|ROYAL PARK
+12|ROYSTON PARK
+33|SALISBURY ALL AREAS
+63|SAMPSON FLAT||(O) Once Daily
+21|SANDY CREEK||(O) PM Tues, Thu
+41|SCOTT CREEK||(O) PM - M,W,F
+24|SEACLIFF
+24|SEACLIFF PARK
+25|SEACOMBE GARDENS
+24|SEACOMBE HEIGHTS
+19|SEAFORD
+19|SEAFORD HEIGHTS
+19|SEAFORD MEADOWS
+19|SEAFORD RISE
+23,39|SEATON
+24|SEAVIEW DOWNS
+30|SEFTON PARK
+56|SELLICKS BEACH||(O) AM
+56|SELLICKS HILL||(O) AM
+38|SEMAPHORE
+23|SEMAPHORE PARK
+38|SEMAPHORE SOUTH
+49,51|SEPPELTSFIELD||(O) AM
+49,51|SHEA-OAK LOG||(O)
+48|SHEIDOW PARK||AM
+56|SILVER SANDS||(O)
+29|SKYE||AM
+10|SMITHFIELD
+10|SMITHFIELD PLAINS
+7|SOMERTON PARK
+25|SOUTH PLYMPTON
+17|SPRINGFIELD||PM
+63|SPRINGTON||(O) Once Daily
+34|ST AGNES
+38|FOREST RANGE||(O) Once Daily
+17|ST GEORGES
+35|ST IVES||(O) PM - M,W,F
+49,51|ST JOHNS||(O) AM
+50|ST KILDA||(O) PM - Tues, Thu
+24|ST MARYS
+1|ST MORRIS
+1,12|ST PETERS
+12|STEPNEY
+41|STIRLING||(O)
+49,51|STOCKWELL||(O) AM - M,W,F
+49,51|STONE WELL||(O) AM
+17|STONYFELL
+43|STRATHALBYN||(O)
+25|STURT
+41|SUMMERTOWN||(O) AM
+34|SURREY DOWNS
+53|SWANPORT||(O)
+49,51|TANUNDA||(O)
+38|TAPEROO||AM
+19,63|TATACHILLA||(O) AM
+34|TEA TREE GULLY
+23,39|TENNYSON
+29|TERINGIE||(O) Once Daily
+64|THE RANGE||(O) AM
+18|THEBARTON
+30|THORNGATE
+24|TONSLEY
+64|TOOPERANG||(O) PM - M,W,F
+17|TOORAK GARDENS
+2|TORRENS ISLAND||AM
+3|TORRENS PARK
+9|TORRENSVILLE|ex Henley Beach Rd
+5|TORRENSVILLE|Henley Beach only
+35|TOTNESS||(O)
+29|TRANMERE
+1|TRINITY GARDENS
+48|TROTT PARK||AM
+17|TUSMORE
+21|TWO WELLS||(O) AM
+10|ULEYBURY||(O) AM
+5|UNDERDALE
+3|UNLEY|ex Greenhill Rd
+17|UNLEY|Greenhill Rd only
+3|UNLEY PARK
+63|UPPER HERMITAGE||(O) Once Daily
+41|UPPER STURT||(O) PM - M,W,F
+41|URAIDLA||(O) AM
+17|URRBRAE||PM
+1|VALE PARK||AM
+30|VALLEY VIEW
+41|VERDUN||(O)
+54|VICTOR HARBOR||(O)
+49,51|VINE VALE||(O)
+50|VIRGINIA||(O) PM
+34|VISTA
+56|WAITPINGA||(O) AM
+1|WALKERVILLE
+30|WALKLEY HEIGHTS
+21|WARD BELT||(O) AM
+25|WARRADALE
+63|WARREN||(O) Once Daily
+17|WATERFALL GULLY
+50|WATERLOO CORNER||PM
+56|WATTLE FLAT||(O) AM
+17|WATTLE PARK
+17|WAYVILLE
+5|WELLAND|ex Port Rd
+18|WELLAND|Port Rd
+39|WEST BEACH
+38|WEST CROYDON
+18|WEST CROYDON|Port Rd
+5|WEST HINDMARSH
+18|WEST HINDMARSH|Port Rd
+23|WEST LAKES
+23|WEST LAKES SHORE
+39|WEST RICHMOND
+3|WESTBOURNE PARK||AM
+53|WHITE HILL||(O) PM
+19|WHITES VALLEY||(O) AM
+21|WILLASTON||(O)
+63|WILLIAMSTOWN||(O) Once Daily
+19|WILLUNGA||(O)
+54|WILLUNGA HILL||(O)
+19|WILLUNGA SOUTH||(O)
+43|WILLYAROO||(O)
+27|WINDSOR GARDENS
+2,36|WINGFIELD|||!
+43|WISTOW||(O)
+43|WOODCHESTER||(O) PM - Fri
+16|WOODCROFT||AM
+29|WOODFORDE
+63|WOODSIDE||(O) Once Daily
+18|WOODVILLE
+39|WOODVILLE|ex Port Rd
+38|WOODVILLE GARDENS
+38|WOODVILLE NORTH
+18|WOODVILLE PARK
+38|WOODVILLE PARK|ex Port Rd
+18,39|WOODVILLE SOUTH
+18|WOODVILLE WEST
+39|WOODVILLE WEST|ex Port Rd
+34|WYNN VALE
+56|YANKALILLA||(O) AM
+30|YATALA PRISON /WOMENS||(L)
+34|YATALA VALE
+10|YATTALUNGA||(O) AM
+64|YUNDI||(O) PM - Tues, Thu
+8|ZOO||AM
+`;
+
+const DATA = RAW.trim().split('\n').map((line, i) => {
+  const p = line.split('|');
+  return {
+    i,
+    nums: p[0].split(',').map(s => s.trim()),
+    name: p[1].trim(),
+    st: (p[2] || '').trim(),
+    sd: (p[3] || '').trim(),
+    chk: (p[4] || '').trim() === '!'
+  };
+});
+
+const TOK = { MOUNT: 'MT', SAINT: 'ST', STH: 'SOUTH', NTH: 'NORTH', GDNS: 'GARDENS', GDN: 'GARDEN', COLONEL: 'COL', PORT: 'PT', HTS: 'HEIGHTS', PK: 'PARK', FLT: 'FLAT' };
+function norm(s) {
+  return String(s || '').toUpperCase().replace(/[’'`.]/g, '').replace(/&/g, ' AND ')
+    .replace(/[^A-Z0-9]+/g, ' ').trim().split(' ').filter(Boolean).map(t => TOK[t] || t).join(' ');
+}
+function prep(q) {
+  return String(q || '').replace(/\b\d{4}\b/g, ' ').replace(/\b(SA|S\.A\.|SOUTH AUSTRALIA)\s*$/i, ' ').trim();
+}
+function title(s) {
+  return s.toLowerCase()
+    .replace(/(^|[\s\-\/'(])([a-z])/g, (m, a, b) => a + b.toUpperCase())
+    .replace(/\bMc([a-z])/g, (m, c) => 'Mc' + c.toUpperCase())
+    .replace(/\bRaaf\b/g, 'RAAF');
+}
+function lev(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let rowMin = i;
+    for (let j = 1; j <= b.length; j++) {
+      const v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      cur.push(v);
+      if (v < rowMin) rowMin = v;
+    }
+    if (rowMin > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+const IDX = new Map();
+DATA.forEach(e => {
+  e.key = norm(e.name);
+  if (!IDX.has(e.key)) IDX.set(e.key, []);
+  IDX.get(e.key).push(e);
+});
+const KEYS = [...IDX.keys()];
+const ALLAREAS = KEYS.filter(k => k.endsWith(' ALL AREAS')).map(k => [k.slice(0, -10), k]);
+
+function lookup(q) {
+  const key = norm(prep(q));
+  if (!key) return { key: '', list: [], how: 'none', sugg: [] };
+  if (IDX.has(key)) return { key, list: IDX.get(key), how: 'exact', match: key };
+  for (const [base, k] of ALLAREAS) {
+    if (key === base || key.startsWith(base + ' ')) return { key, list: IDX.get(k), how: 'area', match: k };
+  }
+  const pre = KEYS.filter(k => k.startsWith(key + ' '));
+  if (pre.length === 1 && key.length >= 4) return { key, list: IDX.get(pre[0]), how: 'near', match: pre[0] };
+  const lim = key.length <= 5 ? 1 : key.length <= 10 ? 2 : 3;
+  const scored = KEYS.map(k => [lev(key, k, lim), k]).filter(x => x[0] <= lim).sort((a, b) => a[0] - b[0]);
+  if (scored.length && (scored.length === 1 || scored[0][0] < scored[1][0])) {
+    return { key, list: IDX.get(scored[0][1]), how: 'near', match: scored[0][1] };
+  }
+  let sugg = scored.slice(0, 5).map(x => x[1]);
+  if (!sugg.length) sugg = pre.slice(0, 5);
+  if (!sugg.length) sugg = KEYS.filter(k => k.includes(key)).slice(0, 5);
+  return { key, list: [], how: 'none', sugg };
+}
+function search(q) {
+  const k = norm(q);
+  if (!k) return [];
+  const starts = [], inc = [];
+  for (const key of KEYS) {
+    if (key.startsWith(k)) starts.push(key);
+    else if (key.includes(k)) inc.push(key);
+  }
+  return starts.concat(inc).slice(0, 8);
+}
+
+function roadNorm(s) {
+  return ' ' + String(s || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ')
+    .replace(/\bROAD\b/g, 'RD').replace(/\bSTREET\b/g, 'ST').replace(/\bSTH\b/g, 'SOUTH')
+    .replace(/\s+/g, ' ').trim() + ' ';
+}
+function phraseOf(e) { return roadNorm(e.st.replace(/^ex\s+/i, '').replace(/\bonly\b/i, '')); }
+function streetHas(street, p) { return !!p.trim() && roadNorm(street).includes(p); }
+const isE = e => /^ex\b/i.test(e.st);
+const isO = e => !!e.st && !isE(e);
+const isN = e => !e.st;
+function resolveVariants(list, street) {
+  if (list.length <= 1) return { groups: list, decided: true };
+  if (!street) return { groups: list, decided: false };
+  const O = list.filter(isO), E = list.filter(isE), N = list.filter(isN);
+  const hit = e => streetHas(street, phraseOf(e));
+  const oh = O.filter(hit);
+  if (oh.length) return { groups: oh, decided: true };
+  if (E.length) {
+    if (E.some(hit)) return N.length ? { groups: N, decided: true } : { groups: list, decided: false };
+    return { groups: E, decided: true };
+  }
+  if (N.length && O.length) return { groups: N, decided: true };
+  return { groups: list, decided: false };
+}
+
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    if (props) for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (v === true) el.setAttribute(k, '');
+      else if (v !== false && v != null) el.setAttribute(k, v);
+    }
+    for (const c of kids.flat()) { if (c == null || c === false) continue; el.append(c.nodeType ? c : document.createTextNode(String(c))); }
+    return el;
+  }
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
+  };
+  let mine = (store.get('belt.mine', []) || []).filter(x => /^\d{1,2}$/.test(String(x))).map(String);
+  const isMine = n => mine.includes(String(n));
+
+  function rank(q) {
+    const k = norm(q);
+    if (!k) return [];
+    const a = [], b = [], c = [];
+    for (const key of KEYS) {
+      if (key.startsWith(k)) a.push(key);
+      else if (key.split(' ').some(w => w.startsWith(k.split(' ')[0])) && key.includes(k.split(' ').slice(-1)[0])) b.push(key);
+      else if (key.includes(k)) c.push(key);
+    }
+    let out = a.concat(b, c);
+    if (!out.length) {
+      const r = lookup(q);
+      if (r.list.length) out = [norm(r.list[0].name)];
+      else out = r.sugg || [];
+    }
+    return out.slice(0, 12);
+  }
+  function tiles(nums, cls) { return h('div', { class: 'nums ' + (cls || '') }, nums.map(n => h('span', { class: 'num' + (isMine(n) ? ' yours' : ''), text: n }))); }
+  function card(key) {
+    const list = IDX.get(key);
+    const all = [];
+    list.forEach(e => e.nums.forEach(n => { if (!all.includes(n)) all.push(n); }));
+    const mineHit = all.filter(isMine);
+    const split = list.length > 1 && list.some(e => e.st);
+    const kids = [h('div', { class: 'who' }, h('div', { class: 'suburb', text: title(list[0].name) }),
+      mine.length ? (mineHit.length ? h('span', { class: 'tag', text: 'Yours' }) : null) : null)];
+    if (!split && list.length === 1) {
+      kids.push(tiles(list[0].nums));
+      if (list[0].sd) kids.push(h('p', { class: 'meta', text: list[0].sd }));
+    } else if (!split) {
+      list.forEach(e => kids.push(h('div', { class: 'vrow' }, tiles(e.nums, 'mid'), e.sd ? h('span', { class: 'vs', text: e.sd }) : null)));
+    } else {
+      list.forEach(e => kids.push(h('div', { class: 'vrow' },
+        tiles(e.nums, 'mid'),
+        h('div', null, h('div', { class: 'vl', text: e.st ? (/^ex\b/i.test(e.st) ? 'Not ' + e.st.replace(/^ex\s+/i, '') : e.st + ' only') : 'Other streets' }),
+          e.sd ? h('div', { class: 'vs', text: e.sd }) : null))));
+    }
+    if (list.some(e => e.chk)) kids.push(h('p', { class: 'warnbox', text: 'This row was hard to read from the photo of the sheet. Check the paper sheet.' }));
+    return h('div', { class: 'rcard' + (split || list.length > 1 ? ' many' : '') }, kids);
+  }
+  const q = $('q'), res = $('res');
+  function render() {
+    const v = q.value.trim();
+    if (!v) { res.replaceChildren(h('p', { class: 'empty', text: 'Type the first few letters of the suburb.' })); return; }
+    const keys = rank(v);
+    res.replaceChildren(...(keys.length ? keys.map(card) : [h('p', { class: 'empty', text: 'No suburb found. Check the spelling.' })]));
+  }
+  q.addEventListener('input', render);
+  $('clear').addEventListener('click', () => { q.value = ''; render(); q.focus(); });
+
+  function renderMine() {
+    $('mine-chips').replaceChildren(...mine.map(n => h('span', { class: 'chip' }, n,
+      h('button', { type: 'button', 'aria-label': 'Remove ' + n, onclick: () => { mine = mine.filter(x => x !== n); store.set('belt.mine', mine); renderMine(); render(); } }, '×'))));
+    $('mine-sum').textContent = 'Your numbers' + (mine.length ? ': ' + mine.join(', ') : '');
+  }
+  $('mine-form').addEventListener('submit', ev => {
+    ev.preventDefault();
+    for (const n of ($('mine-input').value.match(/\d{1,2}/g) || []).map(s => String(parseInt(s, 10)))) if (!mine.includes(n) && mine.length < 12) mine.push(n);
+    $('mine-input').value = ''; store.set('belt.mine', mine); renderMine(); render();
+  });
+  if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* offline cache unavailable */ } }
+  renderMine(); render();
+})();
+
+</script>
+</body>
+</html>
