@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Belt Numbers">
 <meta name="theme-color" content="#F0B400">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' data: blob:; worker-src 'self' blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <title>Belt Numbers Live</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="vendor/tesseract.min.js"></script>
 <style>
 /* Layout: one narrow column built for one hand on a phone. Result card on top, scan button docked at the bottom of the screen. */
 :root {
@@ -26,8 +26,8 @@
   --warn: #8F2514;
   --warn-bg: #FBE9E4;
   --focus: #0B57D0;
-  --font-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
-  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-display: 'Avenir Next Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -1179,7 +1179,13 @@ function findMatches(text) {
     if (worker) return worker;
     if (!window.Tesseract) throw { code: 'lib' };
     setStat('Loading the reader. First time takes a little while.');
-    const w = await Tesseract.createWorker('eng');
+    const base = new URL('vendor/', location.href).href;
+    const w = await Tesseract.createWorker('eng', 1, {
+      workerPath: base + 'worker.min.js',
+      corePath: base,
+      langPath: base + 'lang',
+      workerBlobURL: false
+    });
     await w.setParameters({
       tessedit_pageseg_mode: '11',
       tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ,.-/\''
@@ -1270,6 +1276,7 @@ function findMatches(text) {
   btn.addEventListener('click', () => { if (running) { stopCam(); setStat('Camera off.'); } else start(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && running) { stopCam(); setStat('Camera stopped when you left the page.'); } });
 
+  if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* offline cache unavailable */ } }
   renderMine(); renderRecent(); idle();
 })();
 
